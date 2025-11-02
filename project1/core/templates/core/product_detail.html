@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ product.name }} - MVP Project{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1 class="mb-4">{{ product.name }}</h1>
+        <p class="lead">{{ product.description }}</p>
+        <p class="h3 text-primary">${{ product.price }}</p>
+        <p><strong>Category:</strong> {{ product.category.name }}</p>
+        <p><strong>Added by:</strong> {{ product.created_by.username }}</p>
+        <p><strong>Date added:</strong> {{ product.created_at|date:"F j, Y" }}</p>
+        
+        <button class="btn btn-primary btn-lg">Add to Cart</button>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ group.name }} - Study Groups{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Main content -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h1 class="card-title">{{ group.name }}</h1>
+                    <h6 class="card-subtitle mb-3 text-muted">{{ group.subject.name }}</h6>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <span class="badge bg-primary me-2">
+                                <i class="bi bi-people"></i> {{ group.members.count }}/{{ group.max_members }} members
+                            </span>
+                            <span class="badge bg-secondary">
+                                Created {{ group.created_at|date:"M d, Y" }}
+                            </span>
+                        </div>
+                        {% if user.is_authenticated %}
+                            {% if is_member %}
+                                <form action="{% url 'core:leave_group' group.id %}" method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-box-arrow-right"></i> Leave Group
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form action="{% url 'core:join_group' group.id %}" method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary" {% if group.members.count >= group.max_members %}disabled{% endif %}>
+                                        <i class="bi bi-person-plus"></i> Join Group
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <h5 class="mb-3">About this group</h5>
+                    <p class="card-text">{{ group.description }}</p>
+
+                    {% if upcoming_sessions %}
+                    <h5 class="mt-4 mb-3">Upcoming Study Sessions</h5>
+                    <div class="list-group">
+                        {% for session in upcoming_sessions %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ session.title }}</h6>
+                                <small class="text-muted">{{ session.date|date:"M d, Y" }}</small>
+                            </div>
+                            <p class="mb-1">{{ session.description|truncatewords:30 }}</p>
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}
+                                {% if session.is_online %}
+                                    <span class="badge bg-info ms-2">Online</span>
+                                {% else %}
+                                    <span class="badge bg-secondary ms-2">{{ session.location }}</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if recent_materials %}
+                    <h5 class="mt-4 mb-3">Recent Study Materials</h5>
+                    <div class="list-group">
+                        {% for material in recent_materials %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ material.title }}</h6>
+                                <small class="text-muted">{{ material.created_at|date:"M d, Y" }}</small>
+                            </div>
+                            <p class="mb-1">{{ material.description|truncatewords:20 }}</p>
+                            <small class="text-muted">Shared by {{ material.uploaded_by.username }}</small>
+                            {% if material.file %}
+                                <a href="{{ material.file.url }}" class="btn btn-sm btn-outline-primary ms-2">
+                                    <i class="bi bi-download"></i> Download
+                                </a>
+                            {% endif %}
+                            {% if material.link %}
+                                <a href="{{ material.link }}" class="btn btn-sm btn-outline-primary ms-2" target="_blank">
+                                    <i class="bi bi-link-45deg"></i> Open Link
+                                </a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Group Stats -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Group Information</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-person-circle"></i> Created by {{ group.created_by.username }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-calendar3"></i> Created {{ group.created_at|date:"F j, Y" }}
+                        </li>
+                        <li>
+                            <i class="bi bi-people-fill"></i> {{ group.members.count }} member{{ group.members.count|pluralize }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Members List -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Members</h5>
+                    <div class="list-group list-group-flush">
+                        {% for membership in group.groupmembership_set.all %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-person-circle"></i>
+                                    {{ membership.user.username }}
+                                    {% if membership.role != 'member' %}
+                                        <span class="badge bg-secondary">{{ membership.role }}</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Joined {{ membership.joined_at|date:"M d" }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

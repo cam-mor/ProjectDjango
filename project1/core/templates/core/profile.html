@@ -1,0 +1,104 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Profile - Study Groups{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle display-1"></i>
+                        <h3 class="mt-2">{{ user.username }}</h3>
+                        <p class="text-muted">Member since {{ user.date_joined|date:"F Y" }}</p>
+                    </div>
+                    
+                    {% if user.profile %}
+                    <div class="mb-3">
+                        <h5>Major</h5>
+                        <p>{{ user.profile.major|default:"Not specified" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5>Bio</h5>
+                        <p>{{ user.profile.bio|default:"No bio provided"|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Groups and Activities -->
+        <div class="col-md-8">
+            <!-- Upcoming Sessions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Upcoming Study Sessions</h4>
+                    {% if upcoming_sessions %}
+                    <div class="list-group">
+                        {% for session in upcoming_sessions %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ session.title }}</h5>
+                                <small class="text-muted">{{ session.date|date:"M d, Y" }}</small>
+                            </div>
+                            <p class="mb-1">{{ session.description|truncatewords:30 }}</p>
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}
+                                {% if session.is_online %}
+                                    <span class="badge bg-info ms-2">Online</span>
+                                {% else %}
+                                    <span class="badge bg-secondary ms-2">{{ session.location }}</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No upcoming sessions.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- My Groups -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="card-title mb-0">My Study Groups</h4>
+                        <a href="{% url 'core:group_create' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Create Group
+                        </a>
+                    </div>
+                    
+                    {% if user_groups %}
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for group in user_groups %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ group.name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ group.subject.name }}</h6>
+                                    <p class="card-text">{{ group.description|truncatewords:20 }}</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a href="{{ group.get_absolute_url }}" class="btn btn-outline-primary btn-sm">View Group</a>
+                                    {% if group in administered_groups %}
+                                    <span class="badge bg-primary float-end">Admin</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">You haven't joined any study groups yet.</p>
+                    <a href="{% url 'core:group_list' %}" class="btn btn-outline-primary">Browse Groups</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

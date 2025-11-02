@@ -1,0 +1,102 @@
+{% load static %}
+
+<div class="card mb-4" id="materials-section">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-file-alt"></i> Study Materials
+            <span class="badge bg-primary">{{ materials.count }}</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if user.is_authenticated and is_member %}
+        <form method="post" action="{% url 'core:upload_material' group.id %}" enctype="multipart/form-data" class="mb-4">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">File</label>
+                        <input type="file" class="form-control" id="file" name="file">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="link" class="form-label">External Link (Optional)</label>
+                <input type="url" class="form-control" id="link" name="link" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Upload Material
+            </button>
+        </form>
+        {% endif %}
+
+        <div class="materials-list">
+            {% for material in materials %}
+            <div class="material-item mb-3 p-3 border rounded">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">{{ material.title }}</h6>
+                        <small class="text-muted">
+                            Uploaded by {{ material.uploaded_by.username }}
+                            {{ material.created_at|timesince }} ago
+                        </small>
+                    </div>
+                    {% if user == material.uploaded_by or is_admin %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form method="post" action="{% url 'core:delete_material' group.id material.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure you want to delete this material?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if material.description %}
+                <p class="mb-2 mt-2">{{ material.description }}</p>
+                {% endif %}
+                <div class="d-flex gap-2">
+                    {% if material.file %}
+                    <a href="{{ material.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                    {% endif %}
+                    {% if material.link %}
+                    <a href="{{ material.link }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> Open Link
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted">
+                <p>No study materials have been shared yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% if materials.count > 5 %}
+<div class="text-center mb-4">
+    <a href="{% url 'core:group_materials' group.id %}" class="btn btn-outline-primary">
+        View All Materials
+    </a>
+</div>
+{% endif %}

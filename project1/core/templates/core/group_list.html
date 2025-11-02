@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Study Groups - Browse{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Sidebar filters -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Filter by Subject</h5>
+                    <div class="list-group mt-3">
+                        <a href="{% url 'core:group_list' %}" 
+                           class="list-group-item list-group-item-action {% if not request.GET.subject %}active{% endif %}">
+                            All Subjects
+                        </a>
+                        {% for subject in subjects %}
+                        <a href="{% url 'core:group_list' %}?subject={{ subject.id }}" 
+                           class="list-group-item list-group-item-action {% if request.GET.subject|add:'0' == subject.id %}active{% endif %}">
+                            {{ subject.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study groups list -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Study Groups</h2>
+                {% if user.is_authenticated %}
+                <a href="{% url 'core:group_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create New Group
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for group in groups %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ group.name }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ group.subject.name }}</h6>
+                            <p class="card-text">{{ group.description|truncatewords:30 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-people"></i> {{ group.members.count }}/{{ group.max_members }} members
+                                </small>
+                                <small class="text-muted">
+                                    Created {{ group.created_at|timesince }} ago
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">By {{ group.created_by.username }}</small>
+                                <a href="{{ group.get_absolute_url }}" class="btn btn-sm btn-outline-primary">View Group</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No study groups found. {% if user.is_authenticated %}Why not <a href="{% url 'core:group_create' %}">create one</a>?{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block object-tools %}
+    {{ block.super }}
+    {% if original %}
+    <li>
+        <a class="addlink" href="{% url 'admin:core_profile_download_db' original.id %}">
+            Download DB
+        </a>
+    </li>
+    <li>
+        <a class="addlink" href="{% url 'admin:core_profile_download_exports' original.id %}">
+            Download Exports (ZIP)
+        </a>
+    </li>
+    {% endif %}
+{% endblock %}
