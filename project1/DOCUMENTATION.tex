@@ -1,0 +1,1442 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{fontawesome5}
+
+\geometry{margin=1in}
+
+% Colores personalizados
+\definecolor{primarycolor}{RGB}{13,110,253}
+\definecolor{successcolor}{RGB}{25,135,84}
+\definecolor{codebackground}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{106,153,85}
+
+% Configuración de hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primarycolor,
+    filecolor=primarycolor,
+    urlcolor=primarycolor,
+    citecolor=primarycolor
+}
+
+% Configuración de listings para código
+\lstset{
+    backgroundcolor=\color{codebackground},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    commentstyle=\color{codecomment},
+    keywordstyle=\color{primarycolor}\bfseries,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    rulecolor=\color{gray!30},
+    tabsize=4
+}
+
+% Encabezado y pie de página
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textbf{Study Groups MVP}}
+\fancyhead[R]{\textit{Documentación Técnica}}
+\fancyfoot[C]{\thepage}
+
+% Formato de secciones
+\titleformat{\section}
+{\color{primarycolor}\normalfont\Large\bfseries}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\color{primarycolor}\normalfont\large\bfseries}
+{\thesubsection}{1em}{}
+
+% Cajas personalizadas
+\newtcolorbox{infobox}{
+    colback=blue!5!white,
+    colframe=primarycolor,
+    title=\faInfoCircle\ Información
+}
+
+\newtcolorbox{successbox}{
+    colback=green!5!white,
+    colframe=successcolor,
+    title=\faCheckCircle\ Ventajas
+}
+
+\begin{document}
+
+% Portada
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries Study Groups MVP\par}
+    \vspace{1cm}
+    {\Large Plataforma Colaborativa de Grupos de Estudio\par}
+    \vspace{2cm}
+    
+    {\large\textit{Documentación Técnica Completa}\par}
+    \vspace{1cm}
+    
+    {\large Versión 1.0\par}
+    \vfill
+    
+    {\large Desarrollado con Django Framework\par}
+    \vspace{0.5cm}
+    {\large\today\par}
+\end{titlepage}
+
+% Índice
+\tableofcontents
+\newpage
+
+% Resumen ejecutivo
+\section*{Resumen Ejecutivo}
+\addcontentsline{toc}{section}{Resumen Ejecutivo}
+
+\textbf{Study Groups MVP} es una plataforma web colaborativa diseñada para estudiantes universitarios que desean organizar y participar en grupos de estudio. La plataforma facilita la comunicación, el intercambio de recursos y la planificación de sesiones de estudio, todo en un entorno centralizado y fácil de usar.
+
+\begin{infobox}
+Este proyecto sigue la metodología \textbf{MVP (Minimum Viable Product)} al implementar las funcionalidades esenciales que resuelven el problema central: conectar estudiantes para estudiar juntos de manera efectiva.
+\end{infobox}
+
+\subsection*{Stack Tecnológico}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Backend:} Django 5.2 (Python)
+    \item \textbf{Frontend:} Bootstrap 5, JavaScript (Vanilla)
+    \item \textbf{Base de Datos:} SQLite (desarrollo), SQL Server (producción)
+    \item \textbf{Iconos:} Font Awesome 5
+    \item \textbf{Autenticación:} Django Authentication System
+\end{itemize}
+
+\newpage
+
+\section{Visión General del Proyecto}
+
+\subsection{Concepto MVP y Justificación}
+
+El concepto de \textbf{Minimum Viable Product (MVP)} se centra en desarrollar un producto con las características mínimas necesarias para satisfacer a los early adopters y validar la idea de negocio.
+
+\subsubsection{Características del MVP}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Funcionalidad Mínima Viable:}
+    \begin{itemize}
+        \item Crear y unirse a grupos de estudio
+        \item Compartir recursos y materiales
+        \item Comunicarse mediante comentarios
+        \item Programar sesiones de estudio
+    \end{itemize}
+    
+    \item \textbf{Validación Rápida:}
+    \begin{itemize}
+        \item Permite probar la idea con usuarios reales
+        \item Recopila feedback para iteraciones futuras
+        \item Minimiza el tiempo de desarrollo inicial
+    \end{itemize}
+    
+    \item \textbf{Base para Iteración:}
+    \begin{itemize}
+        \item Arquitectura escalable para nuevas features
+        \item Código modular y mantenible
+        \item Diseño preparado para crecimiento
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Problema que Resuelve}
+
+Los estudiantes universitarios enfrentan varios desafíos al intentar formar grupos de estudio efectivos:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Desorganización:} WhatsApp groups caóticos, emails dispersos
+    \item \textbf{Falta de centralización:} Recursos compartidos en múltiples plataformas
+    \item \textbf{Dificultad de coordinación:} Programar sesiones sin herramientas adecuadas
+    \item \textbf{Comunicación ineficiente:} Sin historial searchable o threading
+\end{itemize}
+
+\begin{successbox}
+Study Groups MVP centraliza todas estas necesidades en una sola plataforma intuitiva y fácil de usar.
+\end{successbox}
+
+\newpage
+
+\section{Módulos Implementados}
+
+\subsection{Módulo 1: Autenticación y Usuarios}
+
+\subsubsection{Sistema de Registro}
+
+\textbf{Funcionalidades implementadas:}
+\begin{itemize}[leftmargin=*]
+    \item Formulario de registro con validación de campos
+    \item Creación automática de perfil al registrarse
+    \item Login automático después del registro exitoso
+    \item Validación de contraseñas seguras
+    \item Prevención de usuarios duplicados
+\end{itemize}
+
+\textbf{Implementación técnica:}
+\begin{lstlisting}[language=Python,caption=UserRegistrationForm]
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+\end{lstlisting}
+
+\begin{successbox}
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Experiencia de usuario fluida (no requiere login post-registro)
+    \item Validación robusta previene errores comunes
+    \item Seguridad integrada con Django's authentication
+\end{itemize}
+\end{successbox}
+
+\subsubsection{Sistema de Login/Logout}
+
+\textbf{Características:}
+\begin{itemize}[leftmargin=*]
+    \item Login con username y contraseña
+    \item Logout seguro con redirección configurable
+    \item Protección de rutas con decoradores \texttt{@login\_required}
+    \item Redirección inteligente a página solicitada (\texttt{?next=})
+    \item Session management automático
+    \item CSRF protection integrada
+\end{itemize}
+
+\subsubsection{Perfiles de Usuario}
+
+Cada usuario tiene un perfil extendido que se crea automáticamente mediante Django signals:
+
+\textbf{Campos del perfil:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Bio:} Descripción personal del estudiante
+    \item \textbf{Major:} Carrera o programa de estudios
+    \item \textbf{Interests:} Áreas de interés académico
+    \item \textbf{Timestamps:} Created\_at, Updated\_at
+\end{itemize}
+
+\begin{lstlisting}[language=Python,caption=Modelo Profile]
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(max_length=500, blank=True)
+    major = models.CharField(max_length=100, blank=True)
+    interests = models.TextField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+\end{lstlisting}
+
+\newpage
+
+\subsection{Módulo 2: Grupos de Estudio}
+
+\subsubsection{Creación de Grupos}
+
+\textbf{Proceso de creación:}
+\begin{enumerate}[leftmargin=*]
+    \item Usuario autenticado accede a formulario de creación
+    \item Completa campos obligatorios: nombre, descripción, materia
+    \item Define capacidad máxima de miembros
+    \item Sistema asigna automáticamente rol de \textbf{Admin} al creador
+    \item Grupo queda visible en búsquedas y listados
+\end{enumerate}
+
+\textbf{Campos del modelo StudyGroup:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{name} - Nombre del grupo
+    \item \texttt{description} - Descripción detallada
+    \item \texttt{subject} - Foreign Key a Subject
+    \item \texttt{created\_by} - Foreign Key al creador
+    \item \texttt{members} - ManyToMany through GroupMembership
+    \item \texttt{max\_members} - Límite de capacidad
+    \item \texttt{is\_active} - Estado del grupo
+    \item \texttt{created\_at, updated\_at} - Timestamps
+\end{itemize}
+
+\begin{successbox}
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Organización por materias facilita descubrimiento
+    \item Control de capacidad previene grupos sobrepoblados
+    \item Roles automáticos simplifican gestión inicial
+    \item Flag \texttt{is\_active} permite archivar sin eliminar
+\end{itemize}
+\end{successbox}
+
+\subsubsection{Sistema de Membresías}
+
+El sistema de membresías implementa una relación many-to-many explícita con campos adicionales:
+
+\textbf{Roles disponibles:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Member:} Rol básico, puede participar en todas las actividades
+    \item \textbf{Moderator:} Puede moderar contenido y ayudar en gestión
+    \item \textbf{Admin:} Control total del grupo, asigna roles
+\end{itemize}
+
+\textbf{Funcionalidades:}
+\begin{itemize}[leftmargin=*]
+    \item Unirse a grupos con un click (si hay espacio disponible)
+    \item Dejar grupos voluntariamente
+    \item Protección: último admin no puede abandonar grupo
+    \item Validación de capacidad antes de unirse
+    \item Tracking de fecha de ingreso (\texttt{joined\_at})
+\end{itemize}
+
+\begin{lstlisting}[language=Python,caption=Vista join\_group]
+@login_required
+def join_group(request, pk):
+    group = get_object_or_404(StudyGroup, pk=pk)
+    if group.members.count() >= group.max_members:
+        messages.error(request, 'This group is already full.')
+        return redirect('core:group_detail', pk=pk)
+    
+    if not group.members.filter(id=request.user.id).exists():
+        GroupMembership.objects.create(
+            user=request.user, group=group, role='member')
+        messages.success(request, 'Successfully joined!')
+    return redirect('core:group_detail', pk=pk)
+\end{lstlisting}
+
+\subsubsection{Búsqueda y Filtrado}
+
+\textbf{Métodos de búsqueda implementados:}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Búsqueda por texto:}
+    \begin{itemize}
+        \item Busca en nombre del grupo
+        \item Busca en descripción
+        \item Busca en nombre de materia asociada
+    \end{itemize}
+    
+    \item \textbf{Filtrado por materia:}
+    \begin{itemize}
+        \item Dropdown con todas las materias disponibles
+        \item Filtro combinable con búsqueda por texto
+    \end{itemize}
+    
+    \item \textbf{Optimizaciones:}
+    \begin{itemize}
+        \item Paginación (12 grupos por página)
+        \item Solo grupos activos (\texttt{is\_active=True})
+        \item Orden descendente por fecha de creación
+    \end{itemize}
+\end{enumerate}
+
+\begin{lstlisting}[language=Python,caption=Vista de búsqueda]
+class StudyGroupSearchView(ListView):
+    model = StudyGroup
+    template_name = 'core/search_results.html'
+    context_object_name = 'groups'
+    paginate_by = 12
+
+    def get_queryset(self):
+        query = self.request.GET.get('q', '')
+        subject = self.request.GET.get('subject', '')
+        queryset = StudyGroup.objects.filter(is_active=True)
+        
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(subject__name__icontains=query))
+        if subject:
+            queryset = queryset.filter(subject_id=subject)
+        return queryset.order_by('-created_at')
+\end{lstlisting}
+
+\newpage
+
+\subsection{Módulo 3: Sesiones de Estudio}
+
+\subsubsection{Programación de Sesiones}
+
+Las sesiones de estudio permiten a los grupos coordinar encuentros:
+
+\textbf{Campos del modelo StudySession:}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{group} - Foreign Key al grupo
+    \item \texttt{title} - Título de la sesión
+    \item \texttt{description} - Detalles de lo que se estudiará
+    \item \texttt{date} - Fecha de la sesión
+    \item \texttt{start\_time, end\_time} - Horario
+    \item \texttt{location} - Ubicación física
+    \item \texttt{is\_online} - Boolean para sesiones virtuales
+    \item \texttt{meeting\_link} - URL para sesiones online
+    \item \texttt{status} - Estado (Scheduled, In Progress, Completed, Cancelled)
+    \item \texttt{created\_by} - Quien creó la sesión
+\end{itemize}
+
+\textbf{Estados posibles:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Scheduled:} Sesión programada, pendiente
+    \item \textbf{In Progress:} Sesión en curso
+    \item \textbf{Completed:} Sesión finalizada
+    \item \textbf{Cancelled:} Sesión cancelada
+\end{itemize}
+
+\begin{successbox}
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Soporte dual: presencial y online
+    \item Tracking de estado facilita seguimiento
+    \item Timestamps permiten análisis de asistencia
+    \item Integración futura con calendarios (Google, Outlook)
+\end{itemize}
+\end{successbox}
+
+\subsubsection{Visualización de Sesiones}
+
+En la página de detalle de cada grupo se muestran:
+
+\begin{itemize}[leftmargin=*]
+    \item Próximas 5 sesiones programadas
+    \item Ordenadas por fecha y hora
+    \item Solo sesiones con estado "Scheduled"
+    \item Indicador visual de modalidad (online vs presencial)
+    \item Link directo a reunión online si aplica
+\end{itemize}
+
+\newpage
+
+\subsection{Módulo 4: Materiales de Estudio}
+
+\subsubsection{Compartir Recursos}
+
+Los miembros pueden compartir dos tipos de recursos:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Archivos locales:}
+    \begin{itemize}
+        \item PDFs, documentos de Word, presentaciones
+        \item Imágenes (diagramas, mapas conceptuales)
+        \item Código fuente (ZIP, scripts)
+        \item Upload directo con Django FileField
+    \end{itemize}
+    
+    \item \textbf{Links externos:}
+    \begin{itemize}
+        \item Videos de YouTube
+        \item Artículos académicos online
+        \item Recursos web interactivos
+        \item Repositorios de GitHub
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Modelo StudyMaterial:}
+\begin{lstlisting}[language=Python]
+class StudyMaterial(models.Model):
+    group = models.ForeignKey(StudyGroup, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    file = models.FileField(upload_to='study_materials/', 
+                           null=True, blank=True)
+    link = models.URLField(null=True, blank=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+\end{lstlisting}
+
+\begin{successbox}
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Centraliza recursos del grupo
+    \item Flexibilidad: archivos locales o URLs
+    \item Crédito al contribuidor (uploaded\_by)
+    \item Timestamps para ordenar por recencia
+\end{itemize}
+\end{successbox}
+
+\newpage
+
+\subsection{Módulo 5: Sistema de Comentarios}
+
+\subsubsection{Comentarios en Grupos}
+
+Sistema completo de discusión con threading de respuestas:
+
+\textbf{Características principales:}
+\begin{itemize}[leftmargin=*]
+    \item Publicar comentarios en la página del grupo
+    \item Editor de texto con formato preservado (linebreaks)
+    \item Solo usuarios autenticados pueden comentar
+    \item Timestamp relativo ("5 minutes ago", "2 hours ago")
+    \item Indicador visual de comentarios editados
+    \item Avatares de usuario (placeholder con posibilidad de personalización)
+\end{itemize}
+
+\textbf{Modelo Comment:}
+\begin{lstlisting}[language=Python]
+class Comment(models.Model):
+    group = models.ForeignKey(StudyGroup, 
+                             on_delete=models.CASCADE,
+                             related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    parent = models.ForeignKey('self', on_delete=models.CASCADE,
+                              null=True, blank=True,
+                              related_name='replies')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_edited = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def save(self, *args, **kwargs):
+        if self.pk:  # Si ya existe (edición)
+            self.is_edited = True
+        super().save(*args, **kwargs)
+\end{lstlisting}
+
+\subsubsection{Sistema de Respuestas (Replies)}
+
+Implementación de threading para conversaciones anidadas:
+
+\textbf{Funcionalidades:}
+\begin{itemize}[leftmargin=*]
+    \item Responder a comentarios específicos
+    \item Estructura anidada (comentario → respuestas)
+    \item Indentación visual para claridad
+    \item Formulario dinámico generado con JavaScript
+    \item Self-referencing Foreign Key (\texttt{parent})
+\end{itemize}
+
+\textbf{Ventajas del threading:}
+\begin{itemize}[leftmargin=*]
+    \item Conversaciones contextualizadas
+    \item Seguimiento claro de discusiones
+    \item Similar a Reddit/Stack Overflow
+    \item Previene confusión en discusiones largas
+\end{itemize}
+
+\subsubsection{Edición y Eliminación}
+
+Control completo sobre contenido propio:
+
+\textbf{Funcionalidades de edición:}
+\begin{enumerate}[leftmargin=*]
+    \item Click en "Edit" abre formulario inline
+    \item Textarea precargado con contenido actual
+    \item Botones: "Save Changes" y "Cancel"
+    \item Cancel restaura contenido original sin reload
+    \item Flag \texttt{is\_edited} se activa automáticamente
+    \item Indicador "(edited)" visible a otros usuarios
+\end{enumerate}
+
+\textbf{Funcionalidades de eliminación:}
+\begin{itemize}[leftmargin=*]
+    \item Confirmación antes de eliminar (JavaScript alert)
+    \item Eliminación en cascada de replies (on\_delete=CASCADE)
+    \item Solo el autor puede eliminar su comentario
+    \item Validación server-side de ownership
+\end{itemize}
+
+\textbf{Seguridad implementada:}
+\begin{lstlisting}[language=Python,caption=Vista de edición con validación]
+@login_required
+def edit_comment(request, group_id, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id,
+                               author=request.user)
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            comment.content = content
+            comment.save()  # is_edited se activa automáticamente
+            messages.success(request, 'Comment updated!')
+    return redirect('core:group_detail', pk=group_id)
+\end{lstlisting}
+
+\begin{successbox}
+\textbf{Seguridad del sistema de comentarios:}
+\begin{itemize}
+    \item Validación de ownership server-side
+    \item CSRF protection en todos los formularios
+    \item XSS prevention con auto-escaping de Django
+    \item Login required para todas las acciones
+\end{itemize}
+\end{successbox}
+
+\subsubsection{Interfaz de Usuario}
+
+Diseño moderno e intuitivo:
+
+\textbf{Componentes UI:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Dropdown menu:} Acciones (Edit/Delete) solo para autor
+    \item \textbf{Reply button:} Inline para cada comentario
+    \item \textbf{Formularios dinámicos:} Se insertan con JavaScript
+    \item \textbf{Avatares:} Placeholders con posibilidad de personalización
+    \item \textbf{Timestamps relativos:} Django's \texttt{timesince} filter
+    \item \textbf{Badge de contador:} Muestra total de comentarios
+\end{itemize}
+
+\textbf{Stack tecnológico UI:}
+\begin{itemize}[leftmargin=*]
+    \item Bootstrap 5 dropdowns y cards
+    \item JavaScript vanilla (no jQuery)
+    \item Event delegation para performance
+    \item Django template tags para URLs seguras
+    \item Font Awesome icons
+\end{itemize}
+
+\newpage
+
+\subsection{Módulo 6: Notificaciones}
+
+\subsubsection{Sistema de Notificaciones}
+
+Infraestructura completa para comunicación:
+
+\textbf{Tipos de notificaciones:}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Session Reminder:} Recordatorio de sesión próxima
+    \item \textbf{New Material:} Nuevo material compartido en grupo
+    \item \textbf{New Comment:} Nuevo comentario en grupo
+    \item \textbf{Group Update:} Cambios importantes en el grupo
+\end{enumerate}
+
+\textbf{Modelo Notification:}
+\begin{lstlisting}[language=Python]
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('session_reminder', 'Study Session Reminder'),
+        ('new_material', 'New Study Material'),
+        ('new_comment', 'New Comment'),
+        ('group_update', 'Group Update'),
+    ]
+    
+    recipient = models.ForeignKey(User, 
+                                 on_delete=models.CASCADE,
+                                 related_name='notifications')
+    notification_type = models.CharField(
+        max_length=20, choices=NOTIFICATION_TYPES)
+    group = models.ForeignKey(StudyGroup, 
+                             on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    related_link = models.URLField(blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+\end{lstlisting}
+
+\subsubsection{Email Notifications}
+
+Sistema de recordatorios por email:
+
+\textbf{Funcionalidades:}
+\begin{itemize}[leftmargin=*]
+    \item Envío automático de recordatorios de sesiones
+    \item Templates HTML profesionales
+    \item Información completa: fecha, hora, ubicación/link
+    \item Envío asíncrono (no bloquea request)
+    \item Fallback a plain text si HTML no soportado
+\end{itemize}
+
+\begin{lstlisting}[language=Python,caption=Envío de email notification]
+@classmethod
+def send_session_reminder(cls, session):
+    for member in session.group.members.all():
+        # Crear notificación in-app
+        notification = cls.objects.create(
+            recipient=member,
+            notification_type='session_reminder',
+            group=session.group,
+            title=f'Upcoming Session: {session.title}',
+            message=f'Session on {session.date} at {session.start_time}'
+        )
+        
+        # Enviar email
+        html_message = render_to_string(
+            'core/email/session_reminder.html',
+            {'user': member, 'session': session})
+        send_mail(
+            subject=f'Reminder: {session.title}',
+            message=strip_tags(html_message),
+            html_message=html_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[member.email],
+            fail_silently=True
+        )
+\end{lstlisting}
+
+\begin{successbox}
+\textbf{Ventajas del sistema de notificaciones:}
+\begin{itemize}
+    \item Mejora engagement y retención
+    \item Reduce no-shows a sesiones
+    \item Mantiene usuarios informados
+    \item Extensible a notificaciones push (futuro)
+\end{itemize}
+\end{successbox}
+
+\newpage
+
+\subsection{Módulo 7: Interfaz y Experiencia de Usuario}
+
+\subsubsection{Design System}
+
+Sistema de diseño consistente en toda la aplicación:
+
+\textbf{Framework y librerías:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Bootstrap 5:} Framework CSS responsive
+    \item \textbf{Font Awesome 5:} 1500+ iconos vectoriales
+    \item \textbf{Custom CSS:} Sobreescrituras para branding
+    \item \textbf{Google Fonts:} Tipografía profesional
+\end{itemize}
+
+\textbf{Principios de diseño aplicados:}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Mobile-first:} Diseño responsive desde pantallas pequeñas
+    \item \textbf{Accesibilidad:} ARIA labels, contraste adecuado, navegación por teclado
+    \item \textbf{Consistencia:} Mismos colores, espaciados y componentes
+    \item \textbf{Feedback visual:} Messages, loading states, hover effects
+\end{enumerate}
+
+\subsubsection{Templates y Layouts}
+
+Arquitectura de templates DRY (Don't Repeat Yourself):
+
+\textbf{Estructura de templates:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{base.html:} Layout principal con navbar, footer, blocks
+    \item \textbf{Templates por módulo:} group\_list, group\_detail, profile, etc.
+    \item \textbf{Partials reutilizables:} comment\_section, materials\_section
+    \item \textbf{Admin templates:} Customización del Django admin
+\end{itemize}
+
+\textbf{Django Template Language features utilizados:}
+\begin{itemize}[leftmargin=*]
+    \item Template inheritance (\texttt{\{% extends \%\}})
+    \item Template blocks (\texttt{\{% block content \%\}})
+    \item Include tags (\texttt{\{% include 'partial.html' \%\}})
+    \item Template filters (\texttt{|timesince}, \texttt{|linebreaks})
+    \item Custom template tags (si aplica)
+\end{itemize}
+
+\subsubsection{Navegación}
+
+Sistema de navegación intuitivo:
+
+\textbf{Componentes de navegación:}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Navbar principal:}
+    \begin{itemize}
+        \item Logo/Home link
+        \item Browse Groups
+        \item My Groups (si autenticado)
+        \item Search bar
+        \item User dropdown (Profile, Logout)
+    \end{itemize}
+    
+    \item \textbf{Breadcrumbs:}
+    \begin{itemize}
+        \item Home > Groups > Django Study Group
+        \item Orientación contextual clara
+    \end{itemize}
+    
+    \item \textbf{Footer:}
+    \begin{itemize}
+        \item Links útiles (About, Contact, Terms)
+        \item Información de copyright
+    \end{itemize}
+\end{enumerate}
+
+\begin{successbox}
+\textbf{Ventajas de la UI/UX:}
+\begin{itemize}
+    \item Curva de aprendizaje mínima
+    \item Familiar para usuarios de redes sociales
+    \item Performance rápida (< 2 segundos load time)
+    \item Compatible con lectores de pantalla
+\end{itemize}
+\end{successbox}
+
+\newpage
+
+\subsection{Módulo 8: Seguridad y Validaciones}
+
+\subsubsection{Autenticación y Autorización}
+
+Múltiples capas de seguridad:
+
+\textbf{Decoradores y mixins:}
+\begin{lstlisting}[language=Python]
+# Function-based views
+@login_required
+def create_group(request):
+    # Solo usuarios autenticados
+    pass
+
+# Class-based views
+class StudyGroupCreateView(LoginRequiredMixin, CreateView):
+    # Solo usuarios autenticados
+    pass
+\end{lstlisting}
+
+\textbf{Validación de ownership:}
+\begin{lstlisting}[language=Python]
+@login_required
+def edit_comment(request, group_id, comment_id):
+    # get_object_or_404 valida que comment exista
+    # author=request.user valida que sea el dueño
+    comment = get_object_or_404(Comment, 
+                               pk=comment_id,
+                               author=request.user)
+    # Solo el autor puede llegar aquí
+\end{lstlisting}
+
+\textbf{Protecciones implementadas:}
+\begin{itemize}[leftmargin=*]
+    \item CSRF tokens en todos los formularios POST
+    \item SQL Injection prevention (Django ORM)
+    \item XSS prevention (auto-escaping de templates)
+    \item Clickjacking protection (X-Frame-Options)
+    \item Session security (HttpOnly cookies)
+\end{itemize}
+
+\subsubsection{Validaciones de Datos}
+
+Validaciones a nivel de modelo, form y view:
+
+\textbf{Nivel de modelo:}
+\begin{lstlisting}[language=Python]
+class GroupMembership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    group = models.ForeignKey(StudyGroup, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    
+    class Meta:
+        unique_together = ['user', 'group']  # No duplicados
+\end{lstlisting}
+
+\textbf{Nivel de form:}
+\begin{lstlisting}[language=Python]
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Email already registered")
+        return email
+\end{lstlisting}
+
+\textbf{Nivel de view:}
+\begin{lstlisting}[language=Python]
+@login_required
+def join_group(request, pk):
+    group = get_object_or_404(StudyGroup, pk=pk)
+    
+    # Validar capacidad
+    if group.members.count() >= group.max_members:
+        messages.error(request, 'Group is full')
+        return redirect('core:group_detail', pk=pk)
+    
+    # Validar no duplicado
+    if group.members.filter(id=request.user.id).exists():
+        messages.warning(request, 'Already a member')
+        return redirect('core:group_detail', pk=pk)
+    
+    # Todo OK, crear membership
+    GroupMembership.objects.create(...)
+\end{lstlisting}
+
+\subsubsection{Manejo de Errores}
+
+Framework de mensajes para feedback consistente:
+
+\textbf{Tipos de mensajes:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Success:} Acción completada exitosamente
+    \item \textbf{Info:} Información neutral
+    \item \textbf{Warning:} Advertencia, acción no crítica
+    \item \textbf{Error:} Error que previno acción
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+from django.contrib import messages
+
+# Success message
+messages.success(request, 'Comment posted successfully!')
+
+# Error message
+messages.error(request, 'This group is already full.')
+
+# Warning message
+messages.warning(request, 'You are already a member.')
+
+# Info message
+messages.info(request, 'Please log in to continue.')
+\end{lstlisting}
+
+\newpage
+
+\subsection{Módulo 9: Base de Datos y Exportación}
+
+\subsubsection{Diseño de Base de Datos}
+
+Arquitectura relacional normalizada:
+
+\textbf{Diagrama de relaciones principales:}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{User} ← (1:1) → \textbf{Profile}
+    \item \textbf{User} ← (1:N) → \textbf{StudyGroup} (created\_by)
+    \item \textbf{User} ← (M:N) → \textbf{StudyGroup} (through GroupMembership)
+    \item \textbf{StudyGroup} ← (1:N) → \textbf{StudySession}
+    \item \textbf{StudyGroup} ← (1:N) → \textbf{StudyMaterial}
+    \item \textbf{StudyGroup} ← (1:N) → \textbf{Comment}
+    \item \textbf{Comment} ← (1:N) → \textbf{Comment} (parent/replies)
+    \item \textbf{Subject} ← (1:N) → \textbf{StudyGroup}
+\end{itemize}
+
+\textbf{Políticas de eliminación (on\_delete):}
+\begin{itemize}[leftmargin=*]
+    \item \texttt{CASCADE}: Profile, Memberships, Sessions, Materials, Comments
+    \item \texttt{SET\_NULL}: Para referencias opcionales (created\_by en Session)
+    \item \texttt{PROTECT}: Para prevenir eliminación accidental (Subject)
+\end{itemize}
+
+\textbf{Indexes y optimizaciones:}
+\begin{lstlisting}[language=Python]
+class Comment(models.Model):
+    # ...campos...
+    
+    class Meta:
+        ordering = ['created_at']  # Default order
+        indexes = [
+            models.Index(fields=['group', 'created_at']),
+            models.Index(fields=['author']),
+        ]
+\end{lstlisting}
+
+\subsubsection{Exportación a SQL Server}
+
+Sistema completo de exportación para analytics:
+
+\textbf{Proceso de exportación:}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Generación de datos:}
+    \begin{lstlisting}[language=Bash]
+python create_samples.py
+    \end{lstlisting}
+    Crea usuarios, grupos, sesiones, materiales y comentarios de prueba.
+    
+    \item \textbf{Export a CSV:}
+    \begin{itemize}
+        \item Django management command personalizado
+        \item Exports automáticos a carpeta \texttt{exports/}
+        \item CSVs para cada modelo
+    \end{itemize}
+    
+    \item \textbf{Conversión a TSV:}
+    \begin{lstlisting}[language=PowerShell]
+cd exports
+.\convert_csvs_to_tsv.ps1
+    \end{lstlisting}
+    Convierte CSVs a TSV para importar a SQL Server sin problemas de comillas.
+    
+    \item \textbf{Importación a SQL Server:}
+    \begin{lstlisting}[language=SQL]
+-- En SSMS
+USE StudyGroupsMVP;
+GO
+-- Ejecutar import_to_sqlserver.sql
+    \end{lstlisting}
+\end{enumerate}
+
+\textbf{Script de importación SQL (características):}
+\begin{itemize}[leftmargin=*]
+    \item Crea schema \texttt{stg} para staging tables
+    \item BULK INSERT desde TSV files
+    \item Mapeo de IDs legacy a nuevos IDs IDENTITY
+    \item Preservación de relaciones parent-child (Comments)
+    \item Constraints y Foreign Keys
+    \item Transacciones para integridad
+\end{itemize}
+
+\begin{successbox}
+\textbf{Ventajas de exportación SQL Server:}
+\begin{itemize}
+    \item Análisis con Power BI / Tableau
+    \item Reportes avanzados con T-SQL
+    \item Backup enterprise-grade
+    \item Interoperabilidad con ERP/CRM
+\end{itemize}
+\end{successbox}
+
+\newpage
+
+\subsection{Módulo 10: Herramientas y Utilidades}
+
+\subsubsection{Admin Panel Customizado}
+
+Django Admin configurado para gestión eficiente:
+
+\textbf{Customizaciones implementadas:}
+\begin{lstlisting}[language=Python,caption=Admin para StudyGroup]
+@admin.register(StudyGroup)
+class StudyGroupAdmin(admin.ModelAdmin):
+    list_display = ['name', 'subject', 'created_by', 
+                   'max_members', 'is_active', 'created_at']
+    list_filter = ['subject', 'is_active', 'created_at']
+    search_fields = ['name', 'description', 
+                    'created_by__username']
+    date_hierarchy = 'created_at'
+    
+    # Inline editing de memberships
+    inlines = [GroupMembershipInline]
+\end{lstlisting}
+
+\textbf{Features del admin:}
+\begin{itemize}[leftmargin=*]
+    \item Filtros por fecha, materia, estado
+    \item Búsqueda en múltiples campos
+    \item Inline editing para relaciones
+    \item Bulk actions (activar/desactivar grupos en masa)
+    \item Custom actions (enviar notificaciones, exportar)
+\end{itemize}
+
+\subsubsection{Fixtures y Datos Iniciales}
+
+Sistema de carga de datos predefinidos:
+
+\textbf{Fixture: initial\_subjects.json}
+\begin{lstlisting}[language=JSON]
+[
+  {
+    "model": "core.subject",
+    "pk": 1,
+    "fields": {
+      "name": "Mathematics",
+      "description": "Algebra, Calculus, Statistics"
+    }
+  },
+  {
+    "model": "core.subject",
+    "pk": 2,
+    "fields": {
+      "name": "Computer Science",
+      "description": "Programming, Algorithms, Data Structures"
+    }
+  }
+  // ... más materias
+]
+\end{lstlisting}
+
+\textbf{Comando de carga:}
+\begin{lstlisting}[language=Bash]
+python manage.py loaddata core/fixtures/initial_subjects.json
+\end{lstlisting}
+
+\textbf{Script create\_samples.py:}
+\begin{itemize}[leftmargin=*]
+    \item Crea 10+ usuarios de prueba
+    \item Genera 15+ grupos en diferentes materias
+    \item Programa 20+ sesiones de estudio
+    \item Comparte 30+ materiales
+    \item Publica 50+ comentarios con replies
+    \item Útil para demos y testing
+\end{itemize}
+
+\newpage
+
+\section{Ventajas Competitivas del MVP}
+
+\subsection{Ventajas Técnicas}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Arquitectura Escalable}
+    \begin{itemize}
+        \item Django ORM abstrae la base de datos
+        \item Migración fácil a PostgreSQL/MySQL
+        \item Template system permite rebranding sin cambios de backend
+        \item API REST agregable con Django REST Framework
+    \end{itemize}
+    
+    \item \textbf{Performance Optimizado}
+    \begin{itemize}
+        \item \texttt{select\_related()} y \texttt{prefetch\_related()} reducen queries N+1
+        \item Paginación en todas las vistas largas
+        \item Caching preparado con Django Cache Framework
+        \item Static files con versioning para cache busting
+    \end{itemize}
+    
+    \item \textbf{Código Mantenible}
+    \begin{itemize}
+        \item Arquitectura DRY (Don't Repeat Yourself)
+        \item Separación de concerns (Models, Views, Templates)
+        \item Código auto-documentado con docstrings
+        \item Tests unitarios preparados (estructura de carpetas)
+    \end{itemize}
+    
+    \item \textbf{Seguridad Robusta}
+    \begin{itemize}
+        \item Framework Django con 15+ años de hardening
+        \item Protección contra OWASP Top 10
+        \item Updates de seguridad regulares de Django
+        \item Best practices seguidas en todo el código
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Ventajas de Negocio}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Time to Market}
+    \begin{itemize}
+        \item MVP funcional desarrollado en semanas
+        \item Deployment rápido (Heroku, Railway, PythonAnywhere)
+        \item No requiere infraestructura compleja inicial
+        \item Iteraciones rápidas basadas en feedback
+    \end{itemize}
+    
+    \item \textbf{Bajo Costo Operacional}
+    \begin{itemize}
+        \item Stack 100\% open source (Django, SQLite, Bootstrap)
+        \item Hosting gratuito disponible (tiers free de Heroku, Railway)
+        \item Sin licencias de software
+        \item Escalamiento horizontal disponible
+    \end{itemize}
+    
+    \item \textbf{Validación de Concepto}
+    \begin{itemize}
+        \item Core features implementadas y validables
+        \item Métricas rastreables (grupos creados, miembros activos)
+        \item Feedback loops integrados (comments, sessions)
+        \item Pivotes rápidos si es necesario
+    \end{itemize}
+    
+    \item \textbf{Monetización Futura}
+    \begin{itemize}
+        \item Freemium model (grupos ilimitados vs limitados)
+        \item Premium features (videollamadas, storage adicional)
+        \item Institucional (licencias para universidades)
+        \item Ads (no intrusivos, relevantes al contexto académico)
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Ventajas para Usuarios}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Facilidad de Uso}
+    \begin{itemize}
+        \item Interfaz familiar similar a redes sociales
+        \item Curva de aprendizaje mínima
+        \item Mobile-friendly (responsive design)
+        \item Accesible desde cualquier navegador
+    \end{itemize}
+    
+    \item \textbf{Centralización}
+    \begin{itemize}
+        \item Todo en un solo lugar (grupos, materiales, calendario, chat)
+        \item No más emails dispersos o WhatsApp groups caóticos
+        \item Historial searchable de discusiones
+        \item Recursos siempre accesibles
+    \end{itemize}
+    
+    \item \textbf{Colaboración Efectiva}
+    \begin{itemize}
+        \item Comunicación asíncrona (comments con threading)
+        \item Compartir recursos fácilmente
+        \item Organización transparente (roles, capacidad)
+        \item Notificaciones que mantienen engagement
+    \end{itemize}
+    
+    \item \textbf{Productividad Académica}
+    \begin{itemize}
+        \item Mejor coordinación de sesiones de estudio
+        \item Recursos centralizados mejoran preparación
+        \item Discusiones estructuradas facilitan aprendizaje
+        \item Tracking de progreso (sesiones completadas)
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+\section{Roadmap: Evolución Post-MVP}
+
+\subsection{Features Corto Plazo (1-3 meses)}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Notificaciones en Tiempo Real}
+    \begin{itemize}
+        \item WebSockets con Django Channels
+        \item Notificaciones push en navegador
+        \item Badge count en navbar
+    \end{itemize}
+    
+    \item \textbf{Upload Múltiple de Archivos}
+    \begin{itemize}
+        \item Drag \& drop interface
+        \item Progress bars para uploads
+        \item Thumbnails para imágenes
+    \end{itemize}
+    
+    \item \textbf{Sistema de Tags}
+    \begin{itemize}
+        \item Tags para categorizar grupos (#exam-prep, #final-project)
+        \item Filtrado por tags
+        \item Auto-suggest tags populares
+    \end{itemize}
+    
+    \item \textbf{Búsqueda Avanzada}
+    \begin{itemize}
+        \item Múltiples filtros combinables
+        \item Búsqueda full-text con Elasticsearch
+        \item Guardar búsquedas favoritas
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Features Mediano Plazo (3-6 meses)}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Integración con Calendarios}
+    \begin{itemize}
+        \item Sincronización con Google Calendar
+        \item Exportar sesiones a .ics
+        \item Recordatorios automáticos
+    \end{itemize}
+    
+    \item \textbf{Videollamadas Integradas}
+    \begin{itemize}
+        \item Integración con Zoom API o Jitsi
+        \item Sala de reunión permanente por grupo
+        \item Grabación de sesiones (premium)
+    \end{itemize}
+    
+    \item \textbf{Gamificación}
+    \begin{itemize}
+        \item Sistema de puntos por participación
+        \item Badges por logros (10 comentarios, organizar 5 sesiones)
+        \item Leaderboards por grupo/universidad
+    \end{itemize}
+    
+    \item \textbf{Recomendaciones con ML}
+    \begin{itemize}
+        \item Algoritmo de matching automático
+        \item Sugerencia de grupos basada en intereses
+        \item Predicción de horarios óptimos para sesiones
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Features Largo Plazo (6-12 meses)}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Mobile Apps Nativas}
+    \begin{itemize}
+        \item Apps iOS/Android con React Native o Flutter
+        \item Push notifications nativas
+        \item Offline mode para materiales
+    \end{itemize}
+    
+    \item \textbf{AI/ML Avanzado}
+    \begin{itemize}
+        \item Chatbot para responder preguntas frecuentes
+        \item Resúmenes automáticos de discusiones largas
+        \item Detección de contenido inapropiado
+    \end{itemize}
+    
+    \item \textbf{Sistema de Reputación}
+    \begin{itemize}
+        \item Ratings de miembros (helpfulness, reliability)
+        \item Trust scores para combatir spam
+        \item Verificación de estudiantes (email institucional)
+    \end{itemize}
+    
+    \item \textbf{Monetización Premium}
+    \begin{itemize}
+        \item Tier gratuito: 3 grupos, 100MB storage
+        \item Tier premium: Grupos ilimitados, 10GB storage, videollamadas
+        \item Tier institucional: Panel de analytics, integración LMS
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+\section{Métricas de Éxito del MVP}
+
+\subsection{KPIs Principales}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Adoption Rate}
+    \begin{itemize}
+        \item Definición: Porcentaje de estudiantes que crean cuenta después de visitar
+        \item Objetivo inicial: 15-20\%
+        \item Medición: Google Analytics + Django analytics
+    \end{itemize}
+    
+    \item \textbf{Engagement}
+    \begin{itemize}
+        \item Comentarios promedio por grupo activo
+        \item Sesiones programadas por grupo/mes
+        \item Materiales compartidos por grupo/mes
+        \item Objetivo: 5+ comentarios, 2+ sesiones, 3+ materiales por grupo/mes
+    \end{itemize}
+    
+    \item \textbf{Retention}
+    \begin{itemize}
+        \item Usuarios que regresan semanalmente
+        \item Objetivo: 40\% semana 1, 25\% mes 1
+        \item Cohort analysis para tracking
+    \end{itemize}
+    
+    \item \textbf{Growth}
+    \begin{itemize}
+        \item Nuevos grupos creados mensualmente
+        \item Objetivo: 20\% crecimiento mensual
+        \item Viral coefficient (invitaciones)
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Objetivos Iniciales (Primeros 3 meses)}
+
+\begin{itemize}[leftmargin=*]
+    \item \checkmark 50+ usuarios registrados
+    \item \checkmark 10+ grupos activos
+    \item \checkmark 80\% de grupos con al menos 1 sesión programada
+    \item \checkmark Promedio de 5+ comentarios por grupo
+    \item \checkmark 3+ materiales compartidos por grupo
+    \item \checkmark 60\% de usuarios retornan dentro de 7 días
+    \item \checkmark NPS (Net Promoter Score) > 40
+\end{itemize}
+
+\subsection{Herramientas de Medición}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Google Analytics}
+    \begin{itemize}
+        \item Tráfico, bounce rate, páginas más visitadas
+        \item Conversión de visitante a registro
+        \item Demografía y dispositivos
+    \end{itemize}
+    
+    \item \textbf{Mixpanel / Amplitude}
+    \begin{itemize}
+        \item Event tracking (grupo creado, comentario publicado)
+        \item Funnels (registro → crear grupo → primera sesión)
+        \item Retention cohorts
+    \end{itemize}
+    
+    \item \textbf{Django Analytics Custom}
+    \begin{itemize}
+        \item Queries SQL para métricas específicas
+        \item Dashboard admin con estadísticas
+        \item Exportes periódicos para análisis
+    \end{itemize}
+    
+    \item \textbf{Hotjar / FullStory}
+    \begin{itemize}
+        \item Session recordings
+        \item Heatmaps de clicks
+        \item Feedback surveys
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+\section{Conclusión: Por Qué Este MVP Es Exitoso}
+
+\subsection{Cumple con los Principios MVP}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Mínimo}
+    \begin{itemize}
+        \item Solo features esenciales implementadas
+        \item Sin bloat o complejidad innecesaria
+        \item Enfoque claro en problema central
+    \end{itemize}
+    
+    \item \textbf{Viable}
+    \begin{itemize}
+        \item Funciona end-to-end sin bugs críticos
+        \item Deployable a producción hoy
+        \item Performance aceptable para usuarios iniciales
+    \end{itemize}
+    
+    \item \textbf{Producto}
+    \begin{itemize}
+        \item No es un prototipo, es software usable
+        \item Valor real para usuarios desde día 1
+        \item Iteraciones basadas en feedback real
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Resuelve un Problema Real}
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Problema → Solución]
+\begin{itemize}
+    \item \textbf{Coordinación caótica} → Sistema de grupos con membresías y roles
+    \item \textbf{Falta de comunicación} → Comentarios con threading y notificaciones
+    \item \textbf{Recursos dispersos} → Materiales centralizados con upload/links
+    \item \textbf{Planificación difícil} → Sesiones programadas con recordatorios
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Base Sólida para Crecimiento}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Arquitectura permite escalar}
+    \begin{itemize}
+        \item Django ORM facilita cambio de DB
+        \item Código modular facilita agregar features
+        \item API REST preparada con DRF
+    \end{itemize}
+    
+    \item \textbf{Código mantenible}
+    \begin{itemize}
+        \item Convenciones Django estándar
+        \item Documentación inline
+        \item Tests preparados
+    \end{itemize}
+    
+    \item \textbf{Stack moderno}
+    \begin{itemize}
+        \item Django 5.2 (LTS support hasta 2026)
+        \item Bootstrap 5 (actualizable)
+        \item JavaScript vanilla (sin deuda técnica de jQuery)
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Diferenciadores Clave}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Feature} & \textbf{Study Groups MVP} & \textbf{Competidores} \\
+\hline
+Grupos ilimitados & \checkmark & Limitado \\
+Comments con threading & \checkmark & Básico \\
+Sesiones presenciales + online & \checkmark & Solo online \\
+Open source & \checkmark & Propietario \\
+Self-hosteable & \checkmark & SaaS only \\
+No ads & \checkmark & Con ads \\
+\hline
+\end{tabular}
+\caption{Comparación con plataformas existentes}
+\end{table}
+
+\vfill
+
+\begin{center}
+\Large\textbf{Study Groups MVP: Conectando estudiantes para el éxito académico colaborativo}
+\end{center}
+
+\end{document}
