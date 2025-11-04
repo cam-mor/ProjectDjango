@@ -19,6 +19,15 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:group_list' %}">Find Groups</a>
                     </li>
+                    {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:stats' %}">Estadísticas</a>
+                    </li>
+                    {% elif user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:my_stats' %}">Mis Estadísticas</a>
+                    </li>
+                    {% endif %}
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:group_create' %}">Create Group</a>
@@ -86,6 +95,11 @@
                     <ul class="list-unstyled">
                         <li><a href="{% url 'core:home' %}" class="text-light">Home</a></li>
                         <li><a href="{% url 'core:group_list' %}" class="text-light">Find Groups</a></li>
+                        {% if user.is_superuser %}
+                        <li><a href="{% url 'core:stats' %}" class="text-light">Estadísticas</a></li>
+                        {% elif user.is_authenticated %}
+                        <li><a href="{% url 'core:my_stats' %}" class="text-light">Mis Estadísticas</a></li>
+                        {% endif %}
                         {% if user.is_authenticated %}
                         <li><a href="{% url 'core:group_create' %}" class="text-light">Create Group</a></li>
                         {% endif %}

@@ -1,0 +1,133 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Edit{% else %}Upload{% endif %} Study Material - {{ group.name }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:group_list' %}">Groups</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:group_detail' group.pk %}">{{ group.name }}</a></li>
+                    <li class="breadcrumb-item active">{% if object %}Edit{% else %}Upload{% endif %} Material</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h2 class="card-title h4 mb-0">
+                        <i class="fas fa-upload"></i>
+                        {% if object %}
+                            Edit Study Material
+                        {% else %}
+                            Upload Study Material
+                        {% endif %}
+                    </h2>
+                    <small>for {{ group.name }}</small>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                                {{ form.title.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">{{ form.title.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Give your material a descriptive title</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                                {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Describe what this material contains</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.file.id_for_label }}" class="form-label fw-bold">
+                                {{ form.file.label }}
+                            </label>
+                            {{ form.file }}
+                            {% if form.file.errors %}
+                                <div class="invalid-feedback d-block">{{ form.file.errors }}</div>
+                            {% endif %}
+                            {% if object.file %}
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        Current file: <a href="{{ object.file.url }}" target="_blank">{{ object.file.name }}</a>
+                                    </small>
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">PDF, Word, PowerPoint, images, etc.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.link.id_for_label }}" class="form-label fw-bold">
+                                {{ form.link.label }}
+                            </label>
+                            {{ form.link }}
+                            {% if form.link.errors %}
+                                <div class="invalid-feedback d-block">{{ form.link.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Google Docs, YouTube, external resources, etc.</small>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You can provide either a file, a link, or both.
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'core:group_detail' group.pk %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-info text-white">
+                                <i class="fas fa-save"></i> 
+                                {% if object %}Save Changes{% else %}Upload Material{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}
+{% endblock %}

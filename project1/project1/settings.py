@@ -139,3 +139,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Maximum file upload size (5MB)
 MAX_UPLOAD_SIZE = 5242880
+
+# Authentication redirects
+LOGIN_REDIRECT_URL = 'core:home'
+LOGOUT_REDIRECT_URL = 'core:home'
+LOGIN_URL = 'login'

@@ -19,21 +19,10 @@ class ProfileInline(admin.StackedInline):
 
 class UserAdmin(BaseUserAdmin):
     inlines = (ProfileInline,)
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'get_study_hours')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('username', 'first_name', 'last_name', 'email')
     ordering = ('-date_joined',)
-
-    def get_study_hours(self, obj):
-        # Calculate total study hours from attended sessions
-        total_hours = StudySession.objects.filter(
-            group__members=obj,
-            status='completed'
-        ).extra(
-            select={'duration': "ROUND(CAST((JULIANDAY(end_time) - JULIANDAY(start_time)) * 24 AS NUMERIC), 2)"}
-        ).aggregate(total=models.Sum('duration'))['total'] or 0
-        return f"{total_hours:.2f} hours"
-    get_study_hours.short_description = 'Total Study Hours'
 
 # Re-register UserAdmin
 admin.site.unregister(User)
@@ -41,23 +30,13 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'major', 'created_at', 'get_groups_count', 'get_study_hours')
+    list_display = ('user', 'major', 'created_at', 'get_groups_count')
     search_fields = ('user__username', 'major', 'interests')
     list_filter = ('major', 'created_at')
     
     def get_groups_count(self, obj):
         return obj.user.study_groups.count()
     get_groups_count.short_description = 'Groups'
-    
-    def get_study_hours(self, obj):
-        total_hours = StudySession.objects.filter(
-            group__members=obj.user,
-            status='completed'
-        ).extra(
-            select={'duration': "ROUND(CAST((JULIANDAY(end_time) - JULIANDAY(start_time)) * 24 AS NUMERIC), 2)"}
-        ).aggregate(total=models.Sum('duration'))['total'] or 0
-        return f"{total_hours:.2f} hours"
-    get_study_hours.short_description = 'Study Hours'
 
     def get_urls(self):
         """Add custom admin URL for downloading the local SQLite database."""

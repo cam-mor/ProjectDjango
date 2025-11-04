@@ -1,115 +1,375 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block title %}{{ group.name }} - Study Groups{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-4">
     <div class="row">
         <!-- Main content -->
         <div class="col-lg-8">
+            <!-- Group Header -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h1 class="card-title">{{ group.name }}</h1>
-                    <h6 class="card-subtitle mb-3 text-muted">{{ group.subject.name }}</h6>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="card-title">{{ group.name }}</h1>
+                            <h6 class="card-subtitle mb-3 text-muted">
+                                <i class="fas fa-book"></i> {{ group.subject.name }}
+                            </h6>
+                        </div>
+                        {% if user_role == 'admin' %}
+                        <a href="{% url 'core:group_edit' group.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit Group
+                        </a>
+                        {% endif %}
+                    </div>
                     
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <span class="badge bg-primary me-2">
-                                <i class="bi bi-people"></i> {{ group.members.count }}/{{ group.max_members }} members
+                                <i class="fas fa-users"></i> {{ group.members.count }}/{{ group.max_members }} members
                             </span>
                             <span class="badge bg-secondary">
-                                Created {{ group.created_at|date:"M d, Y" }}
+                                <i class="fas fa-calendar"></i> Created {{ group.created_at|date:"M d, Y" }}
                             </span>
+                            {% if is_member %}
+                                {% if user_role == 'admin' %}
+                                    <span class="badge bg-danger">Admin</span>
+                                {% elif user_role == 'moderator' %}
+                                    <span class="badge bg-warning">Moderator</span>
+                                {% endif %}
+                            {% endif %}
                         </div>
                         {% if user.is_authenticated %}
                             {% if is_member %}
                                 <form action="{% url 'core:leave_group' group.id %}" method="post" style="display: inline;">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger">
-                                        <i class="bi bi-box-arrow-right"></i> Leave Group
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-sign-out-alt"></i> Leave Group
                                     </button>
                                 </form>
                             {% else %}
                                 <form action="{% url 'core:join_group' group.id %}" method="post" style="display: inline;">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary" {% if group.members.count >= group.max_members %}disabled{% endif %}>
-                                        <i class="bi bi-person-plus"></i> Join Group
+                                    <button type="submit" class="btn btn-primary btn-sm" {% if group.members.count >= group.max_members %}disabled{% endif %}>
+                                        <i class="fas fa-user-plus"></i> Join Group
                                     </button>
                                 </form>
                             {% endif %}
                         {% endif %}
                     </div>
 
-                    <h5 class="mb-3">About this group</h5>
+                    <h5 class="mb-3"><i class="fas fa-info-circle"></i> About this group</h5>
                     <p class="card-text">{{ group.description }}</p>
 
+                    <h5 class="mb-3"><i class="fas fa-info-circle"></i> About this group</h5>
+                    <p class="card-text">{{ group.description }}</p>
+                </div>
+            </div>
+
+            <!-- Study Sessions Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Study Sessions</h5>
+                    {% if is_member %}
+                        {% if user_role == 'admin' or user_role == 'moderator' %}
+                        <a href="{% url 'core:session_create' group.pk %}" class="btn btn-sm btn-light">
+                            <i class="fas fa-plus"></i> Schedule Session
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="card-body">
                     {% if upcoming_sessions %}
-                    <h5 class="mt-4 mb-3">Upcoming Study Sessions</h5>
-                    <div class="list-group">
+                    <div class="list-group list-group-flush">
                         {% for session in upcoming_sessions %}
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ session.title }}</h6>
-                                <small class="text-muted">{{ session.date|date:"M d, Y" }}</small>
-                            </div>
-                            <p class="mb-1">{{ session.description|truncatewords:30 }}</p>
-                            <small class="text-muted">
-                                <i class="bi bi-clock"></i> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}
-                                {% if session.is_online %}
-                                    <span class="badge bg-info ms-2">Online</span>
-                                {% else %}
-                                    <span class="badge bg-secondary ms-2">{{ session.location }}</span>
+                        <div class="list-group-item px-0">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ session.title }}</h6>
+                                    <p class="mb-2 text-muted">{{ session.description|truncatewords:30 }}</p>
+                                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> {{ session.date|date:"M d, Y" }}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}
+                                        </small>
+                                        {% if session.is_online %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-video"></i> Online
+                                            </span>
+                                            {% if session.meeting_link %}
+                                                <a href="{{ session.meeting_link }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                    <i class="fas fa-external-link-alt"></i> Join Meeting
+                                                </a>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-map-marker-alt"></i> {{ session.location }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if user_role == 'admin' or user_role == 'moderator' or session.created_by == user %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'core:session_edit' session.pk %}">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="{% url 'core:session_delete' session.pk %}">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                                 {% endif %}
-                            </small>
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
-                    {% endif %}
-
-                    {% if recent_materials %}
-                    <h5 class="mt-4 mb-3">Recent Study Materials</h5>
-                    <div class="list-group">
-                        {% for material in recent_materials %}
-                        <div class="list-group-item">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ material.title }}</h6>
-                                <small class="text-muted">{{ material.created_at|date:"M d, Y" }}</small>
-                            </div>
-                            <p class="mb-1">{{ material.description|truncatewords:20 }}</p>
-                            <small class="text-muted">Shared by {{ material.uploaded_by.username }}</small>
-                            {% if material.file %}
-                                <a href="{{ material.file.url }}" class="btn btn-sm btn-outline-primary ms-2">
-                                    <i class="bi bi-download"></i> Download
-                                </a>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                        <p>No upcoming sessions scheduled yet.</p>
+                        {% if is_member %}
+                            {% if user_role == 'admin' or user_role == 'moderator' %}
+                            <a href="{% url 'core:session_create' group.pk %}" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Schedule First Session
+                            </a>
                             {% endif %}
-                            {% if material.link %}
-                                <a href="{{ material.link }}" class="btn btn-sm btn-outline-primary ms-2" target="_blank">
-                                    <i class="bi bi-link-45deg"></i> Open Link
-                                </a>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Study Materials Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-folder-open"></i> Study Materials</h5>
+                    {% if is_member %}
+                    <a href="{% url 'core:material_upload' group.pk %}" class="btn btn-sm btn-light">
+                        <i class="fas fa-upload"></i> Upload Material
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if recent_materials %}
+                    <div class="list-group list-group-flush">
+                        {% for material in recent_materials %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        {% if material.file %}
+                                            <i class="fas fa-file-pdf text-danger"></i>
+                                        {% elif material.link %}
+                                            <i class="fas fa-link text-primary"></i>
+                                        {% endif %}
+                                        {{ material.title }}
+                                    </h6>
+                                    <p class="mb-2 text-muted small">{{ material.description|truncatewords:20 }}</p>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i> {{ material.uploaded_by.username }}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar"></i> {{ material.created_at|date:"M d, Y" }}
+                                        </small>
+                                        {% if material.file %}
+                                            <a href="{{ material.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                                                <i class="fas fa-download"></i> Download
+                                            </a>
+                                        {% endif %}
+                                        {% if material.link %}
+                                            <a href="{{ material.link }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                <i class="fas fa-external-link-alt"></i> Open Link
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if user_role == 'admin' or user_role == 'moderator' or material.uploaded_by == user %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'core:material_edit' material.pk %}">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="{% url 'core:material_delete' material.pk %}">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-folder-open fa-3x mb-3"></i>
+                        <p>No materials shared yet.</p>
+                        {% if is_member %}
+                        <a href="{% url 'core:material_upload' group.pk %}" class="btn btn-info text-white">
+                            <i class="fas fa-upload"></i> Upload First Material
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            {% if is_member %}
+                {% include 'core/comments/comment_section.html' %}
+            {% else %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center text-muted">
+                        <i class="fas fa-lock fa-3x mb-3"></i>
+                        <p>Join this group to participate in discussions.</p>
+                    </div>
+                </div>
+            {% endif %}
         </div>
 
         <!-- Sidebar -->
         <div class="col-lg-4">
+            <!-- Group Stats (Charts) -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Group Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Presets">
+                            <a class="btn btn-outline-secondary" href="?preset=4w">4 semanas</a>
+                            <a class="btn btn-outline-secondary" href="?preset=8w">8 semanas</a>
+                            <a class="btn btn-outline-secondary" href="?preset=12w">12 semanas</a>
+                            <a class="btn btn-outline-secondary" href="?preset=26w">26 semanas</a>
+                            <a class="btn btn-outline-secondary" href="?">Reset</a>
+                        </div>
+                    </div>
+                    <form method="get" class="row g-2 align-items-end mb-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Desde</label>
+                            <input type="date" class="form-control form-control-sm" name="from" value="{{ group_filter_start }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Hasta</label>
+                            <input type="date" class="form-control form-control-sm" name="to" value="{{ group_filter_end }}">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button class="btn btn-sm btn-outline-primary" type="submit">Aplicar</button>
+                        </div>
+                    </form>
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="text-muted small">Sesiones</div>
+                            <div class="h6 mb-0">{{ group_total_sessions }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted small">Horas</div>
+                            <div class="h6 mb-0">{{ group_total_hours }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted small">Materiales</div>
+                            <div class="h6 mb-0">{{ group_total_materials }}</div>
+                        </div>
+                    </div>
+                    <div class="mb-3" style="height: 160px;">
+                        <canvas id="grpHoursPerWeek"></canvas>
+                    </div>
+                    <div style="height: 160px;">
+                        <canvas id="grpSessionsPerWeek"></canvas>
+                    </div>
+                    <div class="mt-3" style="height: 160px;">
+                        <canvas id="grpScatter"></canvas>
+                        <div class="text-muted small mt-1">Dispersión: cada punto es una sesión</div>
+                    </div>
+                    <div class="mt-3" style="height: 160px;">
+                        <canvas id="grpHist"></canvas>
+                        <div class="text-muted small mt-1">Cantidad de sesiones por duración</div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a class="btn btn-sm btn-outline-success" href="{% url 'core:group_stats_export' group.pk %}?from={{ group_filter_start }}&to={{ group_filter_end }}">
+                            <i class="fas fa-file-csv"></i> Exportar CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Top Members -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-trophy"></i> Top 5 Miembros</h5>
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'core:group_top_members_export' group.pk %}?from={{ group_filter_start }}&to={{ group_filter_end }}">
+                        <i class="fas fa-file-csv"></i> Exportar
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if group_top_members %}
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th class="ps-3">Usuario</th>
+                                    <th class="text-center">Sesiones</th>
+                                    <th class="text-end pe-3">Horas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in group_top_members %}
+                                <tr>
+                                    <td class="ps-3">{{ row.user }}</td>
+                                    <td class="text-center">{{ row.sessions }}</td>
+                                    <td class="text-end pe-3">{{ row.hours }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-3 text-center text-muted small">No hay sesiones en el rango seleccionado.</div>
+                    {% endif %}
+                </div>
+            </div>
             <!-- Group Stats -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Group Information</h5>
+                    <h5 class="card-title"><i class="fas fa-info-circle"></i> Group Information</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <i class="bi bi-person-circle"></i> Created by {{ group.created_by.username }}
+                            <i class="fas fa-user-circle text-primary"></i> 
+                            <strong>Creator:</strong> {{ group.created_by.username }}
                         </li>
                         <li class="mb-2">
-                            <i class="bi bi-calendar3"></i> Created {{ group.created_at|date:"F j, Y" }}
+                            <i class="fas fa-calendar-plus text-success"></i> 
+                            <strong>Created:</strong> {{ group.created_at|date:"F j, Y" }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-users text-info"></i> 
+                            <strong>Members:</strong> {{ group.members.count }}/{{ group.max_members }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-calendar-check text-warning"></i> 
+                            <strong>Sessions:</strong> {{ upcoming_sessions|length }}
                         </li>
                         <li>
-                            <i class="bi bi-people-fill"></i> {{ group.members.count }} member{{ group.members.count|pluralize }}
+                            <i class="fas fa-file-alt text-secondary"></i> 
+                            <strong>Materials:</strong> {{ recent_materials|length }}
                         </li>
                     </ul>
                 </div>
@@ -117,20 +377,73 @@
 
             <!-- Members List -->
             <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Members</h5>
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Members ({{ group.members.count }})</h5>
+                </div>
+                <div class="card-body p-0">
                     <div class="list-group list-group-flush">
                         {% for membership in group.groupmembership_set.all %}
-                        <div class="list-group-item px-0">
+                        <div class="list-group-item">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="bi bi-person-circle"></i>
-                                    {{ membership.user.username }}
-                                    {% if membership.role != 'member' %}
-                                        <span class="badge bg-secondary">{{ membership.role }}</span>
+                                <div class="flex-grow-1">
+                                    <i class="fas fa-user-circle"></i>
+                                    <strong>{{ membership.user.username }}</strong>
+                                    {% if membership.role == 'admin' %}
+                                        <span class="badge bg-danger ms-1">Admin</span>
+                                    {% elif membership.role == 'moderator' %}
+                                        <span class="badge bg-warning ms-1">Mod</span>
                                     {% endif %}
+                                    <br>
+                                    <small class="text-muted">Joined {{ membership.joined_at|date:"M d, Y" }}</small>
                                 </div>
-                                <small class="text-muted">Joined {{ membership.joined_at|date:"M d" }}</small>
+                                {% if user_role == 'admin' and user != membership.user %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <h6 class="dropdown-header">Change Role</h6>
+                                        </li>
+                                        <li>
+                                            <form method="post" action="{% url 'core:change_member_role' group.pk membership.pk %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="role" value="member">
+                                                <button type="submit" class="dropdown-item" {% if membership.role == 'member' %}disabled{% endif %}>
+                                                    Member
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form method="post" action="{% url 'core:change_member_role' group.pk membership.pk %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="role" value="moderator">
+                                                <button type="submit" class="dropdown-item" {% if membership.role == 'moderator' %}disabled{% endif %}>
+                                                    Moderator
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                            <form method="post" action="{% url 'core:change_member_role' group.pk membership.pk %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="role" value="admin">
+                                                <button type="submit" class="dropdown-item" {% if membership.role == 'admin' %}disabled{% endif %}>
+                                                    Admin
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="post" action="{% url 'core:remove_member' group.pk membership.pk %}" onsubmit="return confirm('Remove {{ membership.user.username }} from the group?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="fas fa-user-times"></i> Remove
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -140,4 +453,114 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const grpCharts = JSON.parse('{{ group_charts_json|escapejs }}');
+    const gHoursCtx = document.getElementById('grpHoursPerWeek').getContext('2d');
+    new Chart(gHoursCtx, {
+        type: 'line',
+        data: {
+            labels: grpCharts.week_labels,
+            datasets: [{
+                label: 'Horas (12 semanas)',
+                data: grpCharts.hours_per_week,
+                borderColor: 'rgba(255, 159, 64, 1)',
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+    });
+
+    const gSessCtx = document.getElementById('grpSessionsPerWeek').getContext('2d');
+    new Chart(gSessCtx, {
+        type: 'bar',
+        data: {
+            labels: grpCharts.week_labels,
+            datasets: [{
+                label: 'Sesiones (12 semanas)',
+                data: grpCharts.sessions_per_week,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, precision: 0 } } }
+    });
+
+    const gScCtx = document.getElementById('grpScatter').getContext('2d');
+    new Chart(gScCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Sesiones',
+                data: grpCharts.scatter_points,
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { 
+                    type: 'linear', 
+                    min: 0, 
+                    max: 24,
+                    ticks: { stepSize: 4 },
+                    title: { display: true, text: 'Hora inicio' }
+                },
+                y: { 
+                    beginAtZero: true,
+                    title: { display: true, text: 'Duración (h)' }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.parsed.x.toFixed(1)}h → ${context.parsed.y.toFixed(2)}h`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const gHistCtx = document.getElementById('grpHist').getContext('2d');
+    new Chart(gHistCtx, {
+        type: 'bar',
+        data: {
+            labels: grpCharts.hist_labels,
+            datasets: [{
+                label: 'Sesiones',
+                data: grpCharts.hist_counts,
+                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            scales: { 
+                y: { 
+                    beginAtZero: true,
+                    ticks: { precision: 0, stepSize: 1 }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.parsed.y} sesiones`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}
