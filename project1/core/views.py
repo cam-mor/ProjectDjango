@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.db.models import Q, Count
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -22,6 +22,22 @@ def home(request):
         'subjects': subjects,
         'recent_groups': recent_groups
     })
+
+def login_view(request):
+    from django.contrib.auth.forms import AuthenticationForm
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('core:home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+def get_started_view(request):
+    # Simple landing page, could redirect to register or show info
+    return render(request, 'core/get_started.html')
 
 class StudyGroupListView(ListView):
     model = StudyGroup

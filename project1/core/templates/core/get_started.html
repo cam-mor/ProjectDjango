@@ -1,0 +1,7 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h2>Get Started</h2>
+<p>Bienvenido a la plataforma de grupos de estudio universitarios. Aquí puedes registrarte, iniciar sesión y encontrar grupos para tus materias.</p>
+<a href="{% url 'core:register' %}"><button>Registrarse</button></a>
+<a href="{% url 'core:login' %}"><button>Iniciar sesión</button></a>
+{% endblock %}
